@@ -1,83 +1,62 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 
 export default function Home() {
-  const [tarefas, setTarefas] = useState({
-    colunas: {
-      coluna0: {
-        id: "coluna0",
-        title: "To do",
-        taskIds: ["1", "2", "3", "4"],
-      },
-      coluna1: {
-        id: "coluna1",
-        title: "Fazendo",
-        taskIds: ["5", "6", "7", "8"],
-      },
-      coluna2: {
-        id: "coluna2",
-        title: "Feito",
-        taskIds: ["9", "10", "11", "12"],
-      },
-    },
-    tarefa: {
-      1: {
-        id: "1",
-        content: "Tarefa 1",
-      },
-      2: {
-        id: "2",
-        content: "Tarefa 2",
-      },
-      3: {
-        id: "3",
-        content: "Tarefa 3",
-      },
-      4: {
-        id: "4",
-        content: "Tarefa 4",
-      },
-      5: {
-        id: "5",
-        content: "Tarefa 5",
-      },
-      6: {
-        id: "6",
-        content: "Tarefa 6",
-      },
-      7: {
-        id: "7",
-        content: "Tarefa 7",
-      },
-      8: {
-        id: "8",
-        content: "Tarefa 8",
-      },
-      9: {
-        id: "9",
-        content: "Tarefa 9",
-      },
-      10: {
-        id: "10",
-        content: "Tarefa 10",
-      },
-      11: {
-        id: "11",
-        content: "Tarefa 11",
-      },
-      12: {
-        id: "12",
-        content: "Tarefa 12",
-      },
-    },
-  });
+  const [tarefas, setTarefas] = useState(null); // Estado inicial vazio
 
+
+  useEffect(() => {
+    // Função para buscar as tarefas do usuário
+    async function fetchTarefas() {
+      try {
+        const response = await fetch('http://localhost:10000/task/search'); // Substitua 'usuario-id' pelo ID do usuário atual
+        const data = await response.json();
+        
+        // Estrutura as tarefas no formato esperado
+        const colunas = {
+          coluna0: { id: "coluna0", title: "to do", taskIds: [] },
+          coluna1: { id: "coluna1", title: "fazendo", taskIds: [] },
+          coluna2: { id: "coluna2", title: "feito", taskIds: [] },
+        };
+
+        const tarefa = {};
+
+        data.forEach(task => {
+          // Distribua as tarefas nas colunas apropriadas (exemplo: com base no status da tarefa)
+          if (task.status === 'to do') {
+            colunas.coluna0.taskIds.push(task.id);
+          } else if (task.status === 'fazendo') {
+            colunas.coluna1.taskIds.push(task.id);
+          } else if (task.status === 'feito') {
+            colunas.coluna2.taskIds.push(task.id);
+          }
+
+          tarefa[task.id] = {
+            id: String(task.id),
+            title: task.title,
+            content: task.content,
+            status: task.status
+          };
+        });
+        
+        setTarefas({ colunas, tarefa });
+        
+      } catch (error) {
+        console.error('Erro ao buscar tarefas:', error);
+      }
+    }
+
+    fetchTarefas();
+  }, []); // Executa o efeito apenas uma vez, após o primeiro render
+  
+  
   if (!tarefas || tarefas.length === 0) {
     return <p>Carregando...</p>;
   }
-
+  console.log(tarefas)
   function reordenar(result) {
+    
     const { destination, source, draggableId } = result;
 
     // Se não há destino (tarefa solta fora de qualquer coluna), retorna sem fazer nada
@@ -158,7 +137,7 @@ export default function Home() {
 
   return (
     <DragDropContext onDragEnd={reordenar}>
-    <div className="flex justify-around	">
+    <div className="flex justify-around	items-center h-screen">
       {Object.values(tarefas.colunas).map((coluna) => (
         <Droppable key={coluna.id} droppableId={coluna.id}>
           {(provided) => (
@@ -186,6 +165,9 @@ export default function Home() {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
+                          <h3 className="text-black text-rigth">
+                            {task?.title}:
+                          </h3>
                           <p className="text-black text-center">
                             {task?.content}
                           </p>

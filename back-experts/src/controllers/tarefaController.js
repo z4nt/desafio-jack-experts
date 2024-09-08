@@ -1,4 +1,4 @@
-const service = require('../services/categoriaService')
+const service = require('../services/tarefaService')
 
 const list =  async (req,res)=>{
     let list = await service.list()
