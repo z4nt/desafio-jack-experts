@@ -15,7 +15,7 @@ const Tarefas = sequelize.define('tarefas', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    status: {
+    TaskStatus: {
         type: DataTypes.STRING,
         allowNull: false
     }

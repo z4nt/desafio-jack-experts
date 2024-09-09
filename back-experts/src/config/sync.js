@@ -3,7 +3,7 @@ const sequelize = require('../config/database.js');
 const Usuarios = require('../models/usuarios');
 const {Tarefas} = require('../models/tarefas.js');
 
-
+ 
 (async () => {
     try {
         await sequelize.sync({force: true});
